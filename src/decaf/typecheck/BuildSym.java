@@ -242,6 +242,22 @@ public class BuildSym extends Tree.Visitor {
 		}
 	}
 
+	@Override
+	public void visitDoing(Tree.Doing doing) {
+		for(Tree.Do doBranch : doing.does) {
+			doBranch.accept(this);
+		}
+	}
+
+	@Override
+    public void visitDo(Tree.Do dostmt)
+    {
+        if(dostmt.doblock != null)
+        {
+            dostmt.doblock.accept(this);
+        }
+    }
+
 	private int calcOrder(Class c) {
 		if (c == null) {
 			return -1;

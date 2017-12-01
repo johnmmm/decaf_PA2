@@ -7,6 +7,8 @@ import java.util.Stack;
 import decaf.Driver;
 import decaf.Location;
 import decaf.tree.Tree;
+import decaf.tree.Tree.Do;
+import decaf.tree.Tree.Doing;
 import decaf.error.BadArgCountError;
 import decaf.error.BadArgTypeError;
 import decaf.error.BadArrElementError;
@@ -22,6 +24,7 @@ import decaf.error.BadTestExpr;
 import decaf.error.BreakOutOfLoopError;
 import decaf.error.ClassNotFoundError;
 import decaf.error.DecafError;
+import decaf.error.DoNoBoolError;
 import decaf.error.FieldNotAccessError;
 import decaf.error.FieldNotFoundError;
 import decaf.error.IncompatBinOpError;
@@ -668,6 +671,34 @@ public class TypeCheck extends Tree.Visitor {
 		}
 		breaks.pop();
 	}
+
+	@Override
+    public void visitDoing(Tree.Doing doing)
+    {
+        if(doing.does != null)
+        {
+            for (Do d : doing.does)
+            {
+                d.accept(this);
+            }
+        }
+    }
+
+    @Override
+    public void visitDo(Do dostmt)
+    {
+        dostmt.value.accept(this);
+        if(!dostmt.value.type.equal(BaseType.ERROR) && !dostmt.value.type.equal(BaseType.BOOL))
+        {
+            issueError(new DoNoBoolError(dostmt.getLocation(), dostmt.value.type.toString()));
+        }
+        breaks.add(dostmt);
+        if(dostmt.doblock != null)
+        {
+            dostmt.doblock.accept(this);
+        }
+        breaks.pop();
+    }
 
 	// visiting types
 	@Override
