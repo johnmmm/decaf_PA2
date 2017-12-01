@@ -16,6 +16,7 @@ import decaf.error.BadLengthArgError;
 import decaf.error.BadLengthError;
 import decaf.error.BadNewArrayLength;
 import decaf.error.BadPrintArgError;
+import decaf.error.BadPrintcompArgError;
 import decaf.error.BadReturnTypeError;
 import decaf.error.BadTestExpr;
 import decaf.error.BreakOutOfLoopError;
@@ -71,25 +72,59 @@ public class TypeCheck extends Tree.Visitor {
 	}
 
 	@Override
-	public void visitUnary(Tree.Unary expr) {
+	public void visitUnary(Tree.Unary expr) 
+	{
 		expr.expr.accept(this);
-		if(expr.tag == Tree.NEG){
+		if(expr.tag == Tree.NEG)
+		{
 			if (expr.expr.type.equal(BaseType.ERROR)
-					|| expr.expr.type.equal(BaseType.INT)) {
+					|| expr.expr.type.equal(BaseType.INT)) 
+			{
 				expr.type = expr.expr.type;
-			} else {
+			} 
+			else 
+			{
 				issueError(new IncompatUnOpError(expr.getLocation(), "-",
 						expr.expr.type.toString()));
 				expr.type = BaseType.ERROR;
 			}
 		}
-		else{
+		else if (expr.tag == Tree.NOT)
+		{
 			if (!(expr.expr.type.equal(BaseType.BOOL) || expr.expr.type
-					.equal(BaseType.ERROR))) {
+					.equal(BaseType.ERROR)))
+			{
 				issueError(new IncompatUnOpError(expr.getLocation(), "!",
 						expr.expr.type.toString()));
 			}
 			expr.type = BaseType.BOOL;
+		}
+		else if (expr.tag == Tree.RE)
+		{
+			if(!(expr.expr.type.equal(BaseType.COMPLEX) || expr.expr.type.equal(BaseType.ERROR)))
+			{
+				issueError(new IncompatUnOpError(expr.getLocation(), "@",
+						expr.expr.type.toString()));
+			}
+			expr.type = BaseType.INT;
+		}
+		else if (expr.tag == Tree.IM)
+		{
+			if(!(expr.expr.type.equal(BaseType.COMPLEX) || expr.expr.type.equal(BaseType.ERROR)))
+			{
+				issueError(new IncompatUnOpError(expr.getLocation(), "$",
+						expr.expr.type.toString()));
+			}
+			expr.type = BaseType.INT;
+		}
+		else 
+		{
+			if(!(expr.expr.type.equal(BaseType.INT) || expr.expr.type.equal(BaseType.ERROR)))
+			{
+				issueError(new IncompatUnOpError(expr.getLocation(), "#",
+						expr.expr.type.toString()));
+			}
+			expr.type = BaseType.COMPLEX;
 		}
 	}
 
@@ -587,6 +622,22 @@ public class TypeCheck extends Tree.Visitor {
 	}
 
 	@Override
+	public void visitPrintcomp(Tree.Printcomp printcompStmt) 
+	{
+		int i = 0;
+		for (Tree.Expr e : printcompStmt.exprs) 
+		{
+			e.accept(this);
+			i++;
+			if (!e.type.equal(BaseType.ERROR) && !e.type.equal(BaseType.COMPLEX)) 
+			{
+				issueError(new BadPrintcompArgError(e.getLocation(), Integer
+						.toString(i), e.type.toString()));
+			}
+		}
+	}
+
+	@Override
 	public void visitReturn(Tree.Return returnStmt) {
 		Type returnType = ((FormalScope) table
 				.lookForScope(Scope.Kind.FORMAL)).getOwner().getReturnType();
@@ -630,6 +681,9 @@ public class TypeCheck extends Tree.Visitor {
 			break;
 		case Tree.BOOL:
 			type.type = BaseType.BOOL;
+			break;
+		case Tree.COMPLEX:
+			type.type = BaseType.COMPLEX;
 			break;
 		default:
 			type.type = BaseType.STRING;
@@ -687,8 +741,21 @@ public class TypeCheck extends Tree.Visitor {
 		Type returnType = BaseType.ERROR;
 		switch (op) {
 		case Tree.PLUS:
-		case Tree.MINUS:
 		case Tree.MUL:
+			//They are just for PLUS and MUL!
+			if(left.type.equal(BaseType.COMPLEX) && (right.type.equal(BaseType.COMPLEX) || right.type.equal(BaseType.INT)))
+			{
+				compatible = true;
+				returnType = BaseType.COMPLEX;
+				break;
+			}
+			else if (left.type.equal(BaseType.INT) && right.type.equal(BaseType.COMPLEX))
+			{
+				compatible = true;
+				returnType = BaseType.COMPLEX;
+				break;
+			}
+		case Tree.MINUS:
 		case Tree.DIV:
 			compatible = left.type.equals(BaseType.INT)
 					&& left.type.equal(right.type);
@@ -726,6 +793,7 @@ public class TypeCheck extends Tree.Visitor {
 		if (!compatible) {
 			issueError(new IncompatBinOpError(location, left.type.toString(),
 					Parser.opStr(op), right.type.toString()));
+			returnType = BaseType.ERROR;
 		}
 		return returnType;
 	}
