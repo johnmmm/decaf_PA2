@@ -17,6 +17,6 @@ public class BadCopyClassError extends DecafError {
 
 	@Override
 	protected String getErrMsg() {
-		return "expected class type for copy expr but" + type + "given";
+		return "expected class type for copy expr but " + type + " given";
 	}
 }

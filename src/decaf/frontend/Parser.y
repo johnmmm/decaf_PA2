@@ -360,11 +360,11 @@ Expr            :	LValue
                 	}	
                 	|	DCOPY '(' Expr ')'
                 	{
-                		$$.expr = new Tree.Dcopy($3.expr, $3.loc);
+                		$$.expr = new Tree.Dcopy($3.expr, $1.loc);
                 	}
                 	|	SCOPY '(' Expr ')'
                 	{
-                		$$.expr = new Tree.Scopy($3.expr, $3.loc);
+                		$$.expr = new Tree.Scopy($3.expr, $1.loc);
                 	}
                 	|	RE Expr
                 	{

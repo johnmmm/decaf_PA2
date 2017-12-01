@@ -1314,13 +1314,13 @@ break;
 case 78:
 //#line 362 "Parser.y"
 {
-                		yyval.expr = new Tree.Dcopy(val_peek(1).expr, val_peek(1).loc);
+                		yyval.expr = new Tree.Dcopy(val_peek(1).expr, val_peek(3).loc);
                 	}
 break;
 case 79:
 //#line 366 "Parser.y"
 {
-                		yyval.expr = new Tree.Scopy(val_peek(1).expr, val_peek(1).loc);
+                		yyval.expr = new Tree.Scopy(val_peek(1).expr, val_peek(3).loc);
                 	}
 break;
 case 80:

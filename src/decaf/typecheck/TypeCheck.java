@@ -11,6 +11,7 @@ import decaf.error.BadArgCountError;
 import decaf.error.BadArgTypeError;
 import decaf.error.BadArrElementError;
 import decaf.error.BadCopyClassError;
+import decaf.error.BadCopyMatchError;
 import decaf.error.BadLengthArgError;
 import decaf.error.BadLengthError;
 import decaf.error.BadNewArrayLength;
@@ -472,15 +473,26 @@ public class TypeCheck extends Tree.Visitor {
 	}
 
 	@Override
-	public void visitAssign(Tree.Assign assign) {
+	public void visitAssign(Tree.Assign assign) 
+	{
 		assign.left.accept(this);
 		assign.expr.accept(this);
-		if (!assign.left.type.equal(BaseType.ERROR)
-				&& (assign.left.type.isFuncType() || !assign.expr.type
-						.compatible(assign.left.type))) {
-			issueError(new IncompatBinOpError(assign.getLocation(),
-					assign.left.type.toString(), "=", assign.expr.type
-							.toString()));
+		if (!assign.left.type.equal(BaseType.ERROR)) 
+		{
+			if (assign.expr.tag == Tree.DCOPY || assign.expr.tag == Tree.SCOPY)
+			{
+				//match error
+				if (assign.expr.type.isClassType() && 
+						(assign.left.type.isFuncType() || !assign.expr.type.equal(assign.left.type)))
+				{
+					issueError(new BadCopyMatchError(assign.getLocation(), assign.left.type.toString(), assign.expr.type.toString()));
+				}
+			}
+			else if (assign.left.type.isFuncType() || !assign.expr.type.compatible(assign.left.type))
+			{
+				issueError(new IncompatBinOpError(assign.getLocation(),assign.left.type.toString(),
+									 "=", assign.expr.type.toString()));				
+			}
 		}
 	}
 
