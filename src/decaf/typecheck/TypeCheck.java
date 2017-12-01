@@ -10,6 +10,7 @@ import decaf.tree.Tree;
 import decaf.error.BadArgCountError;
 import decaf.error.BadArgTypeError;
 import decaf.error.BadArrElementError;
+import decaf.error.BadCopyClassError;
 import decaf.error.BadLengthArgError;
 import decaf.error.BadLengthError;
 import decaf.error.BadNewArrayLength;
@@ -100,6 +101,8 @@ public class TypeCheck extends Tree.Visitor {
 		case Tree.STRING:
 			literal.type = BaseType.STRING;
 			break;
+		case Tree.COMPLEX:
+			literal.type = BaseType.COMPLEX;
 		}
 	}
 
@@ -286,6 +289,39 @@ public class TypeCheck extends Tree.Visitor {
 			thisExpr.type = ((ClassScope) table.lookForScope(Scope.Kind.CLASS))
 					.getOwner().getType();
 		}
+	}
+
+	@Override
+	public void visitSuper(Tree.Super thisExpr) {
+		if (currentFunction.isStatik()) {
+			issueError(new ThisInStaticFuncError(thisExpr.getLocation()));
+			thisExpr.type = BaseType.ERROR;
+		} else {
+			thisExpr.type = ((ClassScope) table.lookForScope(Scope.Kind.CLASS))
+					.getOwner().getType();
+		}
+	}
+
+	@Override
+	public void visitDcopy(Tree.Dcopy dcopyExpr) 
+	{
+		dcopyExpr.value.accept(this);
+		if(!dcopyExpr.value.type.isClassType())
+		{
+			issueError(new BadCopyClassError(dcopyExpr.getLocation(), dcopyExpr.value.type.toString()));
+		}	
+		dcopyExpr.type = dcopyExpr.value.type;
+	}
+
+	@Override
+	public void visitScopy(Tree.Scopy scopyExpr) 
+	{
+		scopyExpr.value.accept(this);
+		if(!scopyExpr.value.type.isClassType())
+		{
+			issueError(new BadCopyClassError(scopyExpr.getLocation(), scopyExpr.value.type.toString()));
+		}
+		scopyExpr.type = scopyExpr.value.type;
 	}
 
 	@Override
