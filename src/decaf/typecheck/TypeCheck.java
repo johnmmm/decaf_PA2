@@ -25,13 +25,16 @@ import decaf.error.FieldNotAccessError;
 import decaf.error.FieldNotFoundError;
 import decaf.error.IncompatBinOpError;
 import decaf.error.IncompatUnOpError;
+import decaf.error.NoSuperParentError;
 import decaf.error.NotArrayError;
 import decaf.error.NotClassError;
 import decaf.error.NotClassFieldError;
 import decaf.error.NotClassMethodError;
 import decaf.error.RefNonStaticError;
 import decaf.error.SubNotIntError;
+import decaf.error.SuperNoSupportError;
 import decaf.error.ThisInStaticFuncError;
+import decaf.error.SuperInStaticFuncError;
 import decaf.error.UndeclVarError;
 import decaf.frontend.Parser;
 import decaf.scope.ClassScope;
@@ -238,6 +241,23 @@ public class TypeCheck extends Tree.Visitor {
 			return;
 		}
 
+		ClassType receiverType = (ClassType) callExpr.receiver.type;
+		if (callExpr.receiver.tag == Tree.SUPER)
+		{
+			if(receiverType.getParentType() != null) //super is not empty
+			{
+				receiverType = receiverType.getParentType();
+				callExpr.receiver.type = receiverType;
+			}
+			else //empty
+			{
+				//No parent error
+				issueError(new NoSuperParentError(callExpr.loc, receiverType.toString()));	
+				callExpr.type = BaseType.ERROR;
+				return;
+			}
+		}
+
 		ClassScope cs = ((ClassType) callExpr.receiver.type)
 				.getClassScope();
 		checkCallExpr(callExpr, cs.lookupVisible(callExpr.method));
@@ -295,7 +315,7 @@ public class TypeCheck extends Tree.Visitor {
 	@Override
 	public void visitSuper(Tree.Super thisExpr) {
 		if (currentFunction.isStatik()) {
-			issueError(new ThisInStaticFuncError(thisExpr.getLocation()));
+			issueError(new SuperInStaticFuncError(thisExpr.getLocation()));
 			thisExpr.type = BaseType.ERROR;
 		} else {
 			thisExpr.type = ((ClassScope) table.lookForScope(Scope.Kind.CLASS))
@@ -398,40 +418,61 @@ public class TypeCheck extends Tree.Visitor {
 
 				}
 			}
-		} else {
+		} 
+		else 
+		{
 			ident.owner.usedForRef = true;
 			ident.owner.accept(this);
-			if (!ident.owner.type.equal(BaseType.ERROR)) {
-				if (ident.owner.isClass || !ident.owner.type.isClassType()) {
+			if (!ident.owner.type.equal(BaseType.ERROR)) 
+			{
+				if (ident.owner.tag == Tree.SUPER)
+				{
+					issueError(new SuperNoSupportError(ident.getLocation()));
+					ident.type = BaseType.ERROR;
+				}
+				else if (ident.owner.isClass || !ident.owner.type.isClassType()) 
+				{
 					issueError(new NotClassFieldError(ident.getLocation(),
 							ident.name, ident.owner.type.toString()));
 					ident.type = BaseType.ERROR;
-				} else {
+				} 
+				else 
+				{
 					ClassScope cs = ((ClassType) ident.owner.type)
 							.getClassScope();
 					Symbol v = cs.lookupVisible(ident.name);
-					if (v == null) {
+					if (v == null) 
+					{
 						issueError(new FieldNotFoundError(ident.getLocation(),
 								ident.name, ident.owner.type.toString()));
 						ident.type = BaseType.ERROR;
-					} else if (v.isVariable()) {
+					} 
+					else if (v.isVariable()) 
+					{
 						ClassType thisType = ((ClassScope) table
 								.lookForScope(Scope.Kind.CLASS)).getOwner()
 								.getType();
 						ident.type = v.getType();
-						if (!thisType.compatible(ident.owner.type)) {
+						if (!thisType.compatible(ident.owner.type)) 
+						{
 							issueError(new FieldNotAccessError(ident
 									.getLocation(), ident.name,
 									ident.owner.type.toString()));
-						} else {
+						} 
+						else 
+						{
 							ident.symbol = (Variable) v;
 							ident.lvKind = Tree.LValue.Kind.MEMBER_VAR;
 						}
-					} else {
+					} 
+					else 
+					{
 						ident.type = v.getType();
 					}
 				}
-			} else {
+			} 
+			else 
+			{
 				ident.type = BaseType.ERROR;
 			}
 		}
