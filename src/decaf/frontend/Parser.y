@@ -382,7 +382,8 @@ Expr            :	LValue
 	
 Constant        :	LITERAL
 					{
-						$$.expr = new Tree.Literal($1.typeTag, $1.literal, $1.loc);
+						$$.constant = new Tree.Literal($1.typeTag, $1.literal, $1.loc);
+						$$.expr = $$.constant;
 					}
                 |	NULL
                 	{
@@ -435,7 +436,7 @@ BreakStmt       :	BREAK
 				
 Cases			:	CASE '(' Expr ')' '{' CaseStmtList DefaultStmt '}'
 					{
-						$$.expr = new Tree.Switch($3.expr, $6.caselist, $7.defa, $1.loc);
+						$$.expr = new Tree.Switch($3.expr, $6.caselist, $7.defa, $3.loc);
 					}
 				;
                 
@@ -452,7 +453,7 @@ CaseStmtList    :   CaseStmtList CaseStmt
                 
 CaseStmt			:	Constant ':' Expr ';'
  					{
- 						$$.cas = new Tree.Case($1.expr, $3.expr, $1.loc);
+ 						$$.cas = new Tree.Case($1.constant, $3.expr, $1.loc);
  					}
  				;
                     

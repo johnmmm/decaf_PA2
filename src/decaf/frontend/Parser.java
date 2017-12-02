@@ -770,7 +770,7 @@ final static String yyrule[] = {
 "PrintCompStmt : PRINTCOMP '(' ExprList ')'",
 };
 
-//#line 527 "Parser.y"
+//#line 528 "Parser.y"
     
 	/**
 	 * 打印当前归约所用的语法规则<br>
@@ -1344,104 +1344,105 @@ break;
 case 83:
 //#line 384 "Parser.y"
 {
-						yyval.expr = new Tree.Literal(val_peek(0).typeTag, val_peek(0).literal, val_peek(0).loc);
+						yyval.constant = new Tree.Literal(val_peek(0).typeTag, val_peek(0).literal, val_peek(0).loc);
+						yyval.expr = yyval.constant;
 					}
 break;
 case 84:
-//#line 388 "Parser.y"
+//#line 389 "Parser.y"
 {
 						yyval.expr = new Null(val_peek(0).loc);
 					}
 break;
 case 85:
-//#line 394 "Parser.y"
+//#line 395 "Parser.y"
 {
 						yyval.expr = new Tree.Super(val_peek(0).loc);
 					}
 break;
 case 87:
-//#line 401 "Parser.y"
+//#line 402 "Parser.y"
 {
                 		yyval = new SemValue();
                 		yyval.elist = new ArrayList<Tree.Expr>();
                 	}
 break;
 case 88:
-//#line 408 "Parser.y"
+//#line 409 "Parser.y"
 {
 						yyval.elist.add(val_peek(0).expr);
 					}
 break;
 case 89:
-//#line 412 "Parser.y"
+//#line 413 "Parser.y"
 {
                 		yyval.elist = new ArrayList<Tree.Expr>();
 						yyval.elist.add(val_peek(0).expr);
                 	}
 break;
 case 90:
-//#line 419 "Parser.y"
+//#line 420 "Parser.y"
 {
 						yyval.stmt = new Tree.WhileLoop(val_peek(2).expr, val_peek(0).stmt, val_peek(4).loc);
 					}
 break;
 case 91:
-//#line 425 "Parser.y"
+//#line 426 "Parser.y"
 {
 						yyval.stmt = new Tree.ForLoop(val_peek(6).stmt, val_peek(4).expr, val_peek(2).stmt, val_peek(0).stmt, val_peek(8).loc);
 					}
 break;
 case 92:
-//#line 431 "Parser.y"
+//#line 432 "Parser.y"
 {
 						yyval.stmt = new Tree.Break(val_peek(0).loc);
 					}
 break;
 case 93:
-//#line 437 "Parser.y"
+//#line 438 "Parser.y"
 {
-						yyval.expr = new Tree.Switch(val_peek(5).expr, val_peek(2).caselist, val_peek(1).defa, val_peek(7).loc);
+						yyval.expr = new Tree.Switch(val_peek(5).expr, val_peek(2).caselist, val_peek(1).defa, val_peek(5).loc);
 					}
 break;
 case 94:
-//#line 443 "Parser.y"
+//#line 444 "Parser.y"
 {
                         yyval.caselist.add(val_peek(0).cas);
                     }
 break;
 case 95:
-//#line 447 "Parser.y"
+//#line 448 "Parser.y"
 {
                         yyval = new SemValue();
                         yyval.caselist = new ArrayList<Tree.Case>();
                     }
 break;
 case 96:
-//#line 454 "Parser.y"
+//#line 455 "Parser.y"
 {
- 						yyval.cas = new Tree.Case(val_peek(3).expr, val_peek(1).expr, val_peek(3).loc);
+ 						yyval.cas = new Tree.Case(val_peek(3).constant, val_peek(1).expr, val_peek(3).loc);
  					}
 break;
 case 97:
-//#line 460 "Parser.y"
+//#line 461 "Parser.y"
 {
                         yyval.defa = new Tree.Default(val_peek(1).expr, val_peek(3).loc);
                     }
 break;
 case 98:
-//#line 465 "Parser.y"
+//#line 466 "Parser.y"
 {
 						yyval.stmt = new Tree.Doing(val_peek(1).doeslist, val_peek(2).loc);
 					}
 break;
 case 99:
-//#line 471 "Parser.y"
+//#line 472 "Parser.y"
 {
 						yyval.doeslist.add(val_peek(0).does);
 					}
 break;
 case 100:
-//#line 475 "Parser.y"
+//#line 476 "Parser.y"
 {
                         yyval = new SemValue();
                         yyval.doeslist = new ArrayList<Tree.Do>();
@@ -1449,54 +1450,54 @@ case 100:
                     }
 break;
 case 101:
-//#line 483 "Parser.y"
+//#line 484 "Parser.y"
 {
 						yyval.does = new Tree.Do(val_peek(2).expr, val_peek(0).stmt, val_peek(2).loc);
 					}
 break;
 case 102:
-//#line 489 "Parser.y"
+//#line 490 "Parser.y"
 {
 						yyval.stmt = new Tree.If(val_peek(3).expr, val_peek(1).stmt, val_peek(0).stmt, val_peek(5).loc);
 					}
 break;
 case 103:
-//#line 495 "Parser.y"
+//#line 496 "Parser.y"
 {
 						yyval.stmt = val_peek(0).stmt;
 					}
 break;
 case 104:
-//#line 499 "Parser.y"
+//#line 500 "Parser.y"
 {
 						yyval = new SemValue();
 					}
 break;
 case 105:
-//#line 505 "Parser.y"
+//#line 506 "Parser.y"
 {
 						yyval.stmt = new Tree.Return(val_peek(0).expr, val_peek(1).loc);
 					}
 break;
 case 106:
-//#line 509 "Parser.y"
+//#line 510 "Parser.y"
 {
                 		yyval.stmt = new Tree.Return(null, val_peek(0).loc);
                 	}
 break;
 case 107:
-//#line 515 "Parser.y"
+//#line 516 "Parser.y"
 {
 						yyval.stmt = new Print(val_peek(1).elist, val_peek(3).loc);
 					}
 break;
 case 108:
-//#line 521 "Parser.y"
+//#line 522 "Parser.y"
 {
 						yyval.stmt = new Tree.Printcomp(val_peek(1).elist, val_peek(3).loc);
 					}
 break;
-//#line 1434 "Parser.java"
+//#line 1435 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####

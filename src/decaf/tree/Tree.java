@@ -1405,10 +1405,10 @@ public abstract class Tree {
     }
     
     public static class Case extends Tree {
-    	public Expr value;
+    	public Literal value;
     	public Expr caseblock;
     	
-    	public Case(Expr value, Expr caseblock, Location loc){
+    	public Case(Literal value, Expr caseblock, Location loc){
     		super(CASE, loc);
     		this.value = value;
     		this.caseblock = caseblock;

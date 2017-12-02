@@ -4,14 +4,23 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
+import javax.swing.plaf.basic.BasicInternalFrameTitlePane.SystemMenuBar;
+
+import java.util.HashSet;
+
 import decaf.Driver;
 import decaf.Location;
 import decaf.tree.Tree;
+import decaf.tree.Tree.Case;
+import decaf.tree.Tree.Default;
 import decaf.tree.Tree.Do;
 import decaf.tree.Tree.Doing;
+import decaf.tree.Tree.Switch;
 import decaf.error.BadArgCountError;
 import decaf.error.BadArgTypeError;
+import decaf.error.BadCaseTypeError;
 import decaf.error.BadArrElementError;
+import decaf.error.BadCaseArgTypeError;
 import decaf.error.BadCopyClassError;
 import decaf.error.BadCopyMatchError;
 import decaf.error.BadLengthArgError;
@@ -23,6 +32,7 @@ import decaf.error.BadReturnTypeError;
 import decaf.error.BadTestExpr;
 import decaf.error.BreakOutOfLoopError;
 import decaf.error.ClassNotFoundError;
+import decaf.error.CaseNotUniqueError;
 import decaf.error.DecafError;
 import decaf.error.DoNoBoolError;
 import decaf.error.FieldNotAccessError;
@@ -78,6 +88,11 @@ public class TypeCheck extends Tree.Visitor {
 	public void visitUnary(Tree.Unary expr) 
 	{
 		expr.expr.accept(this);
+		if(expr.expr.type.equal(BaseType.ERROR))
+		{
+			expr.expr.type = BaseType.ERROR;
+			return;
+		}
 		if(expr.tag == Tree.NEG)
 		{
 			if (expr.expr.type.equal(BaseType.ERROR)
@@ -670,6 +685,81 @@ public class TypeCheck extends Tree.Visitor {
 			whileLoop.loopBody.accept(this);
 		}
 		breaks.pop();
+	}
+
+	@Override
+	public void visitSwitch(Switch switchs) 
+	{
+		if(switchs.state != null)
+		{
+			switchs.state.accept(this);
+			if(!switchs.state.type.equal(BaseType.ERROR) && !switchs.state.type.equal(BaseType.INT))
+			{
+				issueError(new BadCaseArgTypeError(switchs.loc, switchs.state.type.toString()));
+				switchs.type = BaseType.ERROR;
+			}
+		}
+		if(switchs.defa != null) //for type error
+		{
+			switchs.defa.accept(this);
+			switchs.type = switchs.defa.type;
+		}
+		if(switchs.cases != null)
+		{
+			HashSet<Object> set = new HashSet<>();
+			for(Case d : switchs.cases)
+			{
+				d.accept(this);
+				//System.out.println(d.value.value);
+				if(!set.contains(d.value.value))
+				{
+					set.add(d.value.value);
+				}
+				else
+				{
+					//error
+					issueError(new CaseNotUniqueError(d.getLocation()));
+				}
+				//type error
+				if(!d.type.equal(BaseType.ERROR) && !d.type.equal(switchs.type))
+				{
+					issueError(new BadCaseTypeError(d.getLocation(), d.type.toString(), switchs.type.toString()));
+					switchs.type = BaseType.ERROR;
+				}
+			}
+		}
+		
+	}
+
+	@Override
+	public void visitCase(Case cas) 
+	{
+		if(cas.value != null)
+		{
+			cas.value.accept(this);
+			if(!cas.value.type.equal(BaseType.ERROR)&& !cas.value.type.equal(BaseType.INT))
+			{
+				//Not int error
+				issueError(new BadCaseArgTypeError(cas.loc, cas.value.type.toString()));
+				cas.type = BaseType.ERROR;
+			}
+		}
+		if(cas.caseblock != null)
+		{
+			cas.caseblock.accept(this);
+			cas.type = cas.caseblock.type;
+			//what about BaseType.ERROR?
+		}
+	}
+
+	@Override
+	public void visitDefault(Default defa) 
+	{
+		if(defa.defas != null)
+		{
+			defa.defas.accept(this);
+		}
+		defa.type = defa.defas.type;
 	}
 
 	@Override
