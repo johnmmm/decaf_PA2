@@ -88,11 +88,11 @@ public class TypeCheck extends Tree.Visitor {
 	public void visitUnary(Tree.Unary expr) 
 	{
 		expr.expr.accept(this);
-		if(expr.expr.type.equal(BaseType.ERROR))
-		{
-			expr.expr.type = BaseType.ERROR;
-			return;
-		}
+		// if(expr.expr.type.equal(BaseType.ERROR))
+		// {
+		// 	expr.expr.type = BaseType.ERROR;
+		// 	return;
+		// }
 		if(expr.tag == Tree.NEG)
 		{
 			if (expr.expr.type.equal(BaseType.ERROR)
