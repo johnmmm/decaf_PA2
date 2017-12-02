@@ -88,11 +88,11 @@ public class TypeCheck extends Tree.Visitor {
 	public void visitUnary(Tree.Unary expr) 
 	{
 		expr.expr.accept(this);
-		// if(expr.expr.type.equal(BaseType.ERROR))
-		// {
-		// 	expr.expr.type = BaseType.ERROR;
-		// 	return;
-		// }
+		if(expr.expr.type.equal(BaseType.ERROR))
+		{
+			expr.type = BaseType.ERROR;
+			return;
+		}
 		if(expr.tag == Tree.NEG)
 		{
 			if (expr.expr.type.equal(BaseType.ERROR)
@@ -710,17 +710,14 @@ public class TypeCheck extends Tree.Visitor {
 			for(Case d : switchs.cases)
 			{
 				d.accept(this);
-				//System.out.println(d.value.value);
 				if(!set.contains(d.value.value))
 				{
 					set.add(d.value.value);
 				}
 				else
 				{
-					//error
 					issueError(new CaseNotUniqueError(d.getLocation()));
 				}
-				//type error
 				if(!d.type.equal(BaseType.ERROR) && !d.type.equal(switchs.type))
 				{
 					issueError(new BadCaseTypeError(d.getLocation(), d.type.toString(), switchs.type.toString()));
@@ -728,7 +725,6 @@ public class TypeCheck extends Tree.Visitor {
 				}
 			}
 		}
-		
 	}
 
 	@Override
@@ -850,12 +846,13 @@ public class TypeCheck extends Tree.Visitor {
 			case Tree.MINUS:
 			case Tree.MUL:
 			case Tree.DIV:
-				return left.type;
+				//return left.type;
 			case Tree.MOD:
-				return BaseType.INT;
+				//return BaseType.INT;
 			default:
-				return BaseType.BOOL;
+				//return BaseType.BOOL;
 			}
+			return BaseType.ERROR;
 		}
 
 		boolean compatible = false;
