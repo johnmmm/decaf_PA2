@@ -3,7 +3,7 @@ package decaf.error;
 import decaf.Location;
 
 /**
- * example：function 'gotoMars' expects 1 argument(s) but 3 given<br>
+ * example：expected class type for copy expr but int given
  * PA2
  */
 public class BadCopyClassError extends DecafError {

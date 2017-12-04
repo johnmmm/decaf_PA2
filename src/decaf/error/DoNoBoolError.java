@@ -3,7 +3,7 @@ package decaf.error;
 import decaf.Location;
 
 /**
- * example：array subscript must be an integer<br>
+ * example：The condition of Do Stmt requestd type bool but int given
  * PA2
  */
 public class DoNoBoolError extends DecafError {

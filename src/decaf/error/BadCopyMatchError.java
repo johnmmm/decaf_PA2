@@ -3,7 +3,7 @@ package decaf.error;
 import decaf.Location;
 
 /**
- * example：function 'gotoMars' expects 1 argument(s) but 3 given<br>
+ * example：For copy expr, the source class : student and the destination class : people are not same
  * PA2
  */
 public class BadCopyMatchError extends DecafError {
